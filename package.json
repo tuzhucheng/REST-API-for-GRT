@@ -4,7 +4,7 @@
   "description": "This is an open source REST API for Grand River Transit (GRT), which serves the Kitchener, Waterloo, and Cambridge regions.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha"
   },
   "repository": {
     "type": "git",
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/tuzhucheng/REST-API-for-GRT",
   "dependencies": {
-    "express": "^3.5.1"
+    "express": "^3.5.1",
+    "mocha": "^1.18.2"
   }
 }
