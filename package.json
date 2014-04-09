@@ -1,0 +1,22 @@
+{
+  "name": "REST-API-for-GRT",
+  "version": "0.0.1",
+  "description": "This is an open source REST API for Grand River Transit (GRT), which serves the Kitchener, Waterloo, and Cambridge regions.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tuzhucheng/REST-API-for-GRT.git"
+  },
+  "author": "Michael Tu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tuzhucheng/REST-API-for-GRT/issues"
+  },
+  "homepage": "https://github.com/tuzhucheng/REST-API-for-GRT",
+  "dependencies": {
+    "express": "^3.5.1"
+  }
+}
