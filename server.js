@@ -13,9 +13,12 @@ app.configure('development', function() {
 });
 
 app.get('/*', function(req, res) {
-	res.json(501, { error: 'API is not yet implemented.'});
+	res.send(501, 'API is not yet implemented.');
 });
 
 http.createServer(app).listen(app.get('port'), function() {
     console.log("Server listening on port " + app.get('port'));
 });
+
+// expose app for testing
+// exports = module.exports = app;
