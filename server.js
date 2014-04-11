@@ -1,6 +1,7 @@
 var http = require('http')
 var express = require('express');
 var app = express();
+var loader = require('./db/loader')
 
 app.configure(function() {
     app.set('port', process.env.PORT || 3000);
@@ -12,6 +13,11 @@ app.configure('development', function() {
     app.use(express.errorHandler());
 });
 
+app.post('/reloadData', function(req, res) {
+    loader.initialize();
+    res.send(200, 'Reload data request sent');
+});
+
 app.get('/*', function(req, res) {
 	res.send(501, 'API is not yet implemented.');
 });
@@ -19,6 +25,3 @@ app.get('/*', function(req, res) {
 http.createServer(app).listen(app.get('port'), function() {
     console.log("Server listening on port " + app.get('port'));
 });
-
-// expose app for testing
-// exports = module.exports = app;
