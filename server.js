@@ -9,20 +9,18 @@ var queryProcessor = require('./db/queryProcessor');
 var conString = 'postgres://localhost:5432/restgrt';
 var pgClient;
 
-app.configure(function() {
-    app.set('port', process.env.PORT || 3000);
-    app.use(express.logger('dev'));
-    app.use(app.router);
-});
+app.set('port', process.env.PORT || 3000);
+app.set('json spaces', 2);
 
-app.configure('development', function() {
-    app.use(express.errorHandler());
-});
+var env = process.env.NODE_ENV || 'development';
+if ('development' == env) {
+    // configure stuff here
+}
 
 app.post('/reloadData', function(req, res) {
     if (pgClient) {
         loader.loadData(pgClient);
-        res.send(200, 'Reload data request sent');
+        res.send(200, 'Reload data request sent\n');
     } else {
         console.err('Connection not made.');
     }
@@ -37,7 +35,7 @@ app.get('/routes', function(req, res) {
 });
 
 app.get('/*', function(req, res) {
-    res.send(501, 'API is not yet implemented.');
+    res.send(501, 'API is not yet implemented.\n');
 });
 
 http.createServer(app).listen(app.get('port'), function() {

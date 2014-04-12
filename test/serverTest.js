@@ -3,10 +3,6 @@ var request = require('supertest');
 var assert = require('assert');
 
 describe('Server', function() {
-    before(function(done) {
-        done();
-    });
-
     describe('Server', function() {
         var url = 'http://localhost:3000';
         it('return unsupported', function(done) {
