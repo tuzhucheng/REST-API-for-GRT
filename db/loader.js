@@ -1,15 +1,6 @@
-var pg = require('pg');
-var conString = 'postgres://localhost:5432/restgrt';
 var fs = require('fs');
 
 var tasks = [
-	function() {
-		pg.connect(conString, function(err, client) {
-			if (err) throw err;
-			console.log('Connected to Postgres.');
-			next(client);
-		});
-	},
 	function(client) {
 		client.query('DROP SCHEMA IF EXISTS public CASCADE', function(err, result) {
 	    	if (err) throw err;
@@ -84,6 +75,6 @@ function insertRow(client, array, i, map) {
 
 }
 
-exports.initialize = function() {
-	next();
+exports.loadData = function(client) {
+	next(client);
 }
