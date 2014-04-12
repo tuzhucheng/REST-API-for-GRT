@@ -12,7 +12,7 @@ describe('Server', function() {
             .expect(501)
             .end(function(err, res) {
                 if (err) return done(err);
-                assert.equal(res.text, 'API is not yet implemented.', 'Unexpected error message');
+                assert.equal(res.text, 'API is not yet implemented.\n', 'Unexpected error message');
                 done();
             });
         });
