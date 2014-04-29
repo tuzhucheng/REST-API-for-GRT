@@ -5,7 +5,7 @@ var assert = require('assert');
 describe('Server', function() {
     describe('Server', function() {
         var url = 'http://localhost:3000';
-        it('return unsupported', function(done) {
+        it('should return unsupported', function(done) {
             request(url)
             .get('/')
             .set('Accept', 'application/json')
@@ -13,6 +13,16 @@ describe('Server', function() {
             .end(function(err, res) {
                 if (err) return done(err);
                 assert.equal(res.text, 'API is not yet implemented.\n', 'Unexpected error message');
+                done();
+            });
+        });
+
+        it('should reload data', function(done) {
+            request(url)
+            .post('/reloadData')
+            .end(function(err, res) {
+                if (err) return done(err);
+                assert.equal(res.text, 'Reload data request sent\n', 'Unexpected request sent message');
                 done();
             });
         });
