@@ -34,6 +34,14 @@ app.get('/routes', function(req, res) {
     }
 });
 
+app.get('/stops', function(req, res) {
+    if (pgClient) {
+        queryProcessor.getStops(req, res, pgClient);
+    } else {
+        console.err('Connection not made');
+    }
+});
+
 app.get('/*', function(req, res) {
     res.send(501, 'API is not yet implemented.\n');
 });

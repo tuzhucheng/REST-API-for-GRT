@@ -21,8 +21,19 @@ var tasks = [
                         'routeName varchar(100))';
 
         client.query(sqlQuery, function(err, result) {
-            if (err) next('Error creating schema.');
+            if (err) throw err;
             console.log('Routes table created.');
+            next(client);
+        });
+    },
+    function(client) {
+        var sqlQuery = 'CREATE TABLE stops (' +
+                        'stopNumber integer PRIMARY KEY, ' +
+                        'stopName varchar(100))';
+
+        client.query(sqlQuery, function(err, result) {
+            if (err) throw err;
+            console.log('Stops table created.');
             next(client);
         });
     },
@@ -31,7 +42,16 @@ var tasks = [
             if (err) throw err;
             var array = data.toString().split('\r\n'); //All files use Windows line endings
             var map = makeColumnNameToIndexMap(array[0]);
-            insertRow(client, array, 1, map); // Start at 1 because row 0 is the header
+            insertRoutesRow(client, array, 1, map); // Start at 1 because row 0 is the header
+            next(client);
+        });
+    },
+    function(client) {
+        fs.readFile('./raw/stops.txt', function(err, data) {
+            if (err) throw err;
+            var array = data.toString().split('\r\n');
+            var map = makeColumnNameToIndexMap(array[0]);
+            insertStopsRow(client, array, 1, map);
         });
     }
 ];
@@ -54,7 +74,7 @@ function makeColumnNameToIndexMap(header) {
     return map;
 }
 
-function insertRow(client, array, i, map) {
+function insertRoutesRow(client, array, i, map) {
     var line = array[i];
     if (line) {
         var tokens = line.split(',');
@@ -65,14 +85,33 @@ function insertRow(client, array, i, map) {
             console.log(sqlQuery);
             client.query(sqlQuery, function(err, data) {
                 if (err) throw err;
-                insertRow(client, array, i+1, map);
+                insertRoutesRow(client, array, i+1, map);
             });
         } else {
             // sometimes due to route changes we get weird routeIds like 14_merged_99830344, these are skipped currently
-            insertRow(client, array, i+1, map);
+            insertRoutesRow(client, array, i+1, map);
         }
     }
 
+}
+
+function insertStopsRow(client, array, i, map) {
+    var line = array[i];
+    if (line) {
+        var tokens = line.split(',');
+        var stopId = tokens[map.stop_id];
+        var stopName = tokens[map.stop_name];
+        if (!isNaN(stopId)) {
+            var sqlQuery = 'INSERT INTO stops VALUES (' + stopId + ',\'' + stopName + '\')';
+            console.log(sqlQuery);
+            client.query(sqlQuery, function(err, data) {
+                if (err) throw err;
+                insertStopsRow(client, array, i+1, map);
+            });
+        } else {
+            insertStopsRow(client, array, i+1, map);
+        }
+    }
 }
 
 exports.loadData = function(client) {
