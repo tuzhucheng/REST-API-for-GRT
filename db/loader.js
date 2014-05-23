@@ -38,6 +38,70 @@ var tasks = [
         });
     },
     function(client) {
+        var sqlQuery = 'CREATE TABLE calendar (' +
+                        'serviceId varchar PRIMARY KEY, ' +
+                        'startDate date, ' +
+                        'endDate date,' +
+                        'monday boolean, ' +
+                        'tuesday boolean, ' +
+                        'wednesday boolean, ' +
+                        'thursday boolean, ' +
+                        'friday boolean, ' +
+                        'saturday boolean, ' +
+                        'sunday boolean)';
+
+        client.query(sqlQuery, function(err, result) {
+            if (err) throw err;
+            console.log('Calendar table created.');
+            next(client);
+        });
+    },
+    function(client) {
+        var sqlQuery = 'CREATE TABLE calendar_dates (' +
+                        'calendarDateId integer PRIMARY KEY, ' +
+                        'serviceId varchar, ' +
+                        'calendarDate date, ' +
+                        'exceptionType integer, ' +
+                        'FOREIGN KEY(serviceId) REFERENCES calendar(serviceId))';
+
+        client.query(sqlQuery, function(err, result) {
+            if (err) throw err;
+            next(client);
+        });
+    },
+    function(client) {
+        var sqlQuery = 'CREATE TABLE trips (' +
+                        'tripId varchar PRIMARY KEY, ' +
+                        'directionId integer, ' +
+                        'tripHeadSign varchar(100), ' +
+                        'routeId integer, ' +
+                        'serviceId varchar, ' +
+                        'FOREIGN KEY(routeId) REFERENCES routes(routeNumber), ' +
+                        'FOREIGN KEY(serviceId) REFERENCES calendar(serviceId))';
+
+        client.query(sqlQuery, function(err, result) {
+            if (err) throw err;
+            console.log('Trips table created.');
+            next(client);
+        });
+    },
+    function(client) {
+        var sqlQuery = 'CREATE TABLE stop_times (' +
+                        'stopTimeId serial PRIMARY KEY, ' +
+                        'tripId varchar, ' +
+                        'stopId integer, ' +
+                        'arrivalTime time without time zone, ' +
+                        'departureTime time without time zone, ' +
+                        'FOREIGN KEY(tripId) REFERENCES trips(tripId), ' +
+                        'FOREIGN KEY(stopId) REFERENCES stops(stopNumber))';
+
+        client.query(sqlQuery, function(err, result) {
+            if (err) throw err;
+            console.log('Stop times table created.');
+            next(client);
+        });
+    },
+    function(client) {
         fs.readFile('./raw/routes.txt', function(err, data) {
             if (err) throw err;
             var array = data.toString().split('\r\n'); //All files use Windows line endings
@@ -52,6 +116,15 @@ var tasks = [
             var array = data.toString().split('\r\n');
             var map = makeColumnNameToIndexMap(array[0]);
             insertStopsRow(client, array, 1, map);
+            next(client);
+        });
+    },
+    function(client) {
+        fs.readFile('./raw/calendar.txt', function(err, data) {
+            if (err) throw err;
+            var array = data.toString().split('\r\n');
+            var map = makeColumnNameToIndexMap(array[0]);
+            insertCalendarRow(client, array, 1, map);
         });
     }
 ];
@@ -82,7 +155,6 @@ function insertRoutesRow(client, array, i, map) {
         var routeName = tokens[map.route_long_name];
         if (!isNaN(routeId)) {
             var sqlQuery = 'INSERT INTO routes VALUES (' + routeId + ',\'' + routeName + '\')';
-            console.log(sqlQuery);
             client.query(sqlQuery, function(err, data) {
                 if (err) throw err;
                 insertRoutesRow(client, array, i+1, map);
@@ -103,7 +175,6 @@ function insertStopsRow(client, array, i, map) {
         var stopName = tokens[map.stop_name];
         if (!isNaN(stopId)) {
             var sqlQuery = 'INSERT INTO stops VALUES (' + stopId + ',\'' + stopName + '\')';
-            console.log(sqlQuery);
             client.query(sqlQuery, function(err, data) {
                 if (err) throw err;
                 insertStopsRow(client, array, i+1, map);
@@ -111,6 +182,35 @@ function insertStopsRow(client, array, i, map) {
         } else {
             insertStopsRow(client, array, i+1, map);
         }
+    }
+}
+
+function insertCalendarRow(client, array, i, map) {
+    var line = array[i];
+    if (line) {
+        var tokens = line.split(',');
+        var serviceId = tokens[map.service_id];
+        var startDate = tokens[map.start_date];
+        var endDate = tokens[map.end_date];
+        var monday = tokens[map.monday];
+        var tuesday = tokens[map.tuesday];
+        var wednesday = tokens[map.wednesday];
+        var thursday = tokens[map.thursday];
+        var friday = tokens[map.friday];
+        var saturday = tokens[map.saturday];
+        var sunday = tokens[map.sunday];
+
+        // Removing '-' from service id
+        var re = /-/g;
+        serviceId = serviceId.replace(re, '');
+
+        var sqlQuery = 'INSERT INTO calendar VALUES (' + serviceId + ',\'' + startDate + ',\'' + endDate + ',\'' + monday + ',\'' + tuesday + ',\'' +
+            wednesday + ',\'' + thursday + ',\'' + friday + ',\'' + saturday + ',\'' + sunday + '\')';
+            client.query(sqlQuery, function(err, data) {
+                if (err) throw err;
+                            console.log("Finished inserting calendar.");
+                insertCalendarRow(client, array, i+1, map);
+            });
     }
 }
 
